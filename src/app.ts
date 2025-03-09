@@ -5,6 +5,13 @@ import authRouter from "./routes/auth-route";
 import "dotenv/config";
 const app = express();
 const port = 3000;
+import cors from "cors";
+app.use(
+    cors({
+        credentials: true,
+        origin: 'http://localhost:3001'
+    })
+)
 
 app.get("/", (req, res) => {
   res.send("Hello, World!");

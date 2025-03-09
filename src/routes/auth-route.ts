@@ -1,7 +1,14 @@
 import express from "express";
 import { login, register } from "../services/auth-service";
+import cors from "cors";
 const router = express.Router();
 
+router.use(
+    cors({
+        credentials: true,
+        origin: 'http://localhost:3001'
+    })
+)
 router.use(express.json());
 
 /**
