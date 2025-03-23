@@ -1,5 +1,5 @@
 import express from "express";
-import { login, register } from "../services/auth-service";
+import { googleAuth, login, register } from "../services/auth-service";
 import cors from "cors";
 const router = express.Router();
 
@@ -115,4 +115,43 @@ router.post("/login", login);
  *         description: Senha inválida
  */
 router.post("/register", register);
+
+/**
+ * @swagger
+ * /register/google-auth:
+ *   post:
+ *     summary: Autenticação com Google
+ *     tags:
+ *       - Auth
+ *     description: Endpoint para autenticar o usuário com Google
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - code
+ *             properties:
+ *               code:
+ *                 type: string
+ *                 example: 4/SDFS6DV14X8CASFSD
+ *     responses:
+ *       200:
+ *         description: Autenticação bem sucedida
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Autenticação bem sucedida
+ *                 token:
+ *                   type: string                    
+ *       500:
+ *         description: Erro Interno do Servidor
+ */
+router.post("/register/google-auth", googleAuth);
+
 export default router;
