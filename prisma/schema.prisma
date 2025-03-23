@@ -18,4 +18,14 @@ model User {
   email    String   @unique
   name     String?
   password String
+
+  googleUser   GoogleUser?
 }
+
+model GoogleUser {
+  id      String   @id @map("_id") @db.ObjectId @default(auto())
+  userId  String   @db.ObjectId @unique
+  sub    String   @unique
+
+  user   User     @relation(fields: [userId], references: [id])
+} 
