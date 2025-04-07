@@ -5,7 +5,7 @@ import { z } from "zod";
 const prisma = new PrismaClient();
 
 type UserType = z.infer<typeof userSchema>;
-export const findSales = async ({userId}:UserType) => {
+export const findSales = async ({ userId }: UserType) => {
   const sales = await prisma.sales.findMany({
     include: {
       customer: {
@@ -46,7 +46,7 @@ export const findSales = async ({userId}:UserType) => {
           rating: true,
           total: true,
         },
-      }
+      },
     },
     where: {
       salesId: {
@@ -56,10 +56,10 @@ export const findSales = async ({userId}:UserType) => {
   });
 
   return salesWithProducts;
-}
+};
 
 type SalesType = UserType & z.infer<typeof salesSchema>;
-export const findSaleById = async ({customerId, userId}: SalesType) => {
+export const findSaleById = async ({ customerId, userId }: SalesType) => {
   const validationSchema = salesSchema.safeParse({ customerId, userId });
   if (!validationSchema.success) throw new Error(validationSchema.error.message);
   const sale = await prisma.sales.findUnique({
@@ -75,13 +75,12 @@ export const findSaleById = async ({customerId, userId}: SalesType) => {
       id: customerId,
       userId: userId,
     },
-    
   });
   return sale;
-}
+};
 
 type CreateSalesType = UserType & z.infer<typeof createSalesSchema>;
-export const createSales = async ({payload, userId}:CreateSalesType) => {
+export const createSales = async ({ payload, userId }: CreateSalesType) => {
   const dataValidation = createSalesSchema.safeParse({ payload, userId });
   if (!dataValidation.success) throw new Error(dataValidation.error.message);
   const sale = await prisma.sales.create({
@@ -97,12 +96,12 @@ export const createSales = async ({payload, userId}:CreateSalesType) => {
         connect: {
           id: userId,
         },
-      }, 
+      },
     },
     select: {
       id: true,
-    }
-  })
+    },
+  });
 
   const saleProducts = await prisma.salesProduct.createMany({
     data: payload.products.map((product) => {
@@ -111,20 +110,19 @@ export const createSales = async ({payload, userId}:CreateSalesType) => {
         quantity: product.quantity,
         salesId: sale.id,
       };
-    }  
-    ),
+    }),
   });
   return saleProducts;
-}
+};
 
 type UpdateSalesType = UserType & z.infer<typeof updateSalesSchema>;
-export const updateSales = async ({customerId, payload, userId}:UpdateSalesType) => {
+export const updateSales = async ({ customerId, payload, userId }: UpdateSalesType) => {
   const validationSchema = updateSalesSchema.safeParse({ customerId, payload });
   if (!validationSchema.success) throw new Error(validationSchema.error.message);
-  const dataSale = await findSaleById({customerId, userId});
+  const dataSale = await findSaleById({ customerId, userId });
   if (!dataSale) throw new Error("Sale not found");
-  const dataUpdated = {...dataSale, ...payload};
-  
+  const dataUpdated = { ...dataSale, ...payload };
+
   const sale = await prisma.sales.update({
     data: {
       customer: {
@@ -138,7 +136,7 @@ export const updateSales = async ({customerId, payload, userId}:UpdateSalesType)
         connect: {
           id: userId,
         },
-      }, 
+      },
     },
     where: {
       id: dataSale.id,
@@ -151,13 +149,12 @@ export const updateSales = async ({customerId, payload, userId}:UpdateSalesType)
         quantity: product.quantity,
         salesId: sale.id,
       };
-    }  
-    ),
+    }),
   });
   return saleProducts;
-}
+};
 
-export const deleteSales = async ({customerId, userId}:SalesType) => {
+export const deleteSales = async ({ customerId, userId }: SalesType) => {
   const validationSchema = salesSchema.safeParse({ customerId, userId });
   if (!validationSchema.success) throw new Error(validationSchema.error.message);
   const sale = await prisma.sales.delete({
@@ -167,4 +164,4 @@ export const deleteSales = async ({customerId, userId}:SalesType) => {
     },
   });
   return sale;
-}
+};

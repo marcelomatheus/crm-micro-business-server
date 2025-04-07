@@ -5,7 +5,7 @@ import { z } from "zod";
 const prisma = new PrismaClient();
 
 type UserType = z.infer<typeof userSchema>;
-export const findProducts = async ({userId}:UserType) => {
+export const findProducts = async ({ userId }: UserType) => {
   const products = await prisma.products.findMany({
     orderBy: {
       createdAt: "asc",
@@ -15,11 +15,10 @@ export const findProducts = async ({userId}:UserType) => {
     },
   });
   return products;
-}
-
+};
 
 type ProductType = UserType & z.infer<typeof productSchema>;
-export const findProductById = async ({productId, userId}:ProductType) => {
+export const findProductById = async ({ productId, userId }: ProductType) => {
   const validationSchema = productSchema.safeParse({ productId });
   if (!validationSchema.success) throw new Error(validationSchema.error.message);
   const product = await prisma.products.findUnique({
@@ -29,11 +28,10 @@ export const findProductById = async ({productId, userId}:ProductType) => {
     },
   });
   return product;
-}
-
+};
 
 type CreateProductType = UserType & z.infer<typeof createProductSchema>;
-export const createProduct = async ({payload, userId}:CreateProductType) => {
+export const createProduct = async ({ payload, userId }: CreateProductType) => {
   const validationSchema = createProductSchema.safeParse({ payload });
   if (!validationSchema.success) throw new Error(validationSchema.error.message);
   const product = await prisma.products.create({
@@ -51,20 +49,19 @@ export const createProduct = async ({payload, userId}:CreateProductType) => {
         connect: {
           id: userId,
         },
-      }
+      },
     },
   });
   return product;
-}
-
+};
 
 type UpdateProductType = UserType & z.infer<typeof updateProductSchema>;
-export const updateProduct = async ({payload, productId, userId}:UpdateProductType) => {
+export const updateProduct = async ({ payload, productId, userId }: UpdateProductType) => {
   const validationSchema = updateProductSchema.safeParse({ payload, productId });
   if (!validationSchema.success) throw new Error(validationSchema.error.message);
-  const dataProduct = await findProductById({productId, userId});
+  const dataProduct = await findProductById({ productId, userId });
   if (!dataProduct) throw new Error("Product not found");
-  const dataUpdated = {...dataProduct, ...payload};
+  const dataUpdated = { ...dataProduct, ...payload };
   const product = await prisma.products.update({
     data: dataUpdated,
     where: {
@@ -73,9 +70,9 @@ export const updateProduct = async ({payload, productId, userId}:UpdateProductTy
     },
   });
   return product;
-}
+};
 
-export const deleteProduct = async ({productId, userId}:ProductType) => {
+export const deleteProduct = async ({ productId, userId }: ProductType) => {
   const validationSchema = productSchema.safeParse({ productId });
   if (!validationSchema.success) throw new Error(validationSchema.error.message);
   const product = await prisma.products.delete({
@@ -85,4 +82,4 @@ export const deleteProduct = async ({productId, userId}:ProductType) => {
     },
   });
   return product;
-}
+};
