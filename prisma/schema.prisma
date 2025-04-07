@@ -14,18 +14,115 @@ datasource db {
 }
 
 model User {
-  id      String   @id @map("_id") @db.ObjectId @default(auto())
-  email    String   @unique
-  name     String?
-  password String
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  email       String  @unique
+  name        String?
+  password    String
+  companyName String?
 
-  googleUser   GoogleUser?
+  googleUser       GoogleUser?
+  Customers        Customers?
+  Sales            Sales?
+  CategoryProducts CategoryProducts?
+  Products         Products?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model GoogleUser {
-  id      String   @id @map("_id") @db.ObjectId @default(auto())
-  userId  String   @db.ObjectId @unique
-  sub    String   @unique
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @unique @db.ObjectId
+  sub    String @unique
 
-  user   User     @relation(fields: [userId], references: [id])
-} 
+  user User @relation(fields: [userId], references: [id])
+}
+
+type CustomerAddressType {
+  zip     String?
+  street  String?
+  city    String
+  state   String
+  country String  @default("Brazil")
+}
+
+enum CustomerStatusEnum {
+  ACTIVE
+  INACTIVE
+}
+
+model Customers {
+  id    String  @id @default(auto()) @map("_id") @db.ObjectId
+  name  String
+  email String?
+  phone String
+
+  address CustomerAddressType?
+  status  CustomerStatusEnum
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique @db.ObjectId
+
+  Sales     Sales?
+
+  createdAt DateTime @default(now())
+}
+
+model Sales {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  rating Int    @default(0)
+  total  Float
+
+  customer   Customers  @relation(fields: [customerId], references: [id])
+  customerId String @unique @db.ObjectId
+
+  userId String @unique @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  salesProduct SalesProduct?
+
+  createdAt DateTime @default(now())
+}
+
+model CategoryProducts {
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+
+  userId String @unique @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  Products Products?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Products {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  price    Float
+  quantity Int
+  image    String?
+
+  categoryId String           @unique @db.ObjectId
+  category   CategoryProducts @relation(fields: [categoryId], references: [id])
+
+  userId String @unique @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  salesProduct SalesProduct?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SalesProduct {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  quantity Int
+
+  salesId String @unique @db.ObjectId
+  sales   Sales  @relation(fields: [salesId], references: [id])
+
+  productId String   @unique @db.ObjectId
+  product   Products @relation(fields: [productId], references: [id])
+}
