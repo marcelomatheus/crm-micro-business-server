@@ -1,12 +1,56 @@
-import globals from "globals";
-import pluginJs from "@eslint/js";
+// @ts-check
+
+import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
+import perfectionist from "eslint-plugin-perfectionist";
+import prettier from "eslint-plugin-prettier";
 
+export default tseslint.config(
+  {
+    ignores: ["**/*.js"],
+  },
+  eslint.configs.recommended,
+  tseslint.configs.strictTypeChecked,
+  tseslint.configs.stylisticTypeChecked,
+  {
+    plugins: {
+      prettier,
+    },
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      "@typescript-eslint/no-unnecessary-boolean-literal-compare": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/restrict-template-expressions": "off",
 
-/** @type {import('eslint').Linter.Config[]} */
-export default [
-  {files: ["**/*.{js,mjs,cjs,ts}"]},
-  {languageOptions: { globals: globals.browser }},
-  pluginJs.configs.recommended,
-  ...tseslint.configs.recommended,
-];
+      "prettier/prettier": [
+       "error",
+    {
+    "endOfLine": "auto"
+  }
+],
+      "semi": ["error", "always"],
+      "quotes": ["error", "double"],
+      "indent": ["error", 2],
+      "object-curly-spacing": ["error", "always"],
+      "comma-dangle": ["error", "always-multiline"],
+      "no-multiple-empty-lines": ["error", { max: 1 }],
+      "space-before-function-paren": ["error", { 
+  "anonymous": "never", 
+  "named": "never", 
+  "asyncArrow": "always" 
+}],
+      "linebreak-style": "off",
+      "keyword-spacing": ["error", { before: true, after: true }],
+    },
+  },
+  perfectionist.configs["recommended-natural"],
+);
