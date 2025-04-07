@@ -1,14 +1,14 @@
-import express from "express";
-import { googleAuth, login, register } from "../services/auth-service";
+import { googleAuth, login, register } from "@/services/auth-service";
 import cors from "cors";
+import express from "express";
 const router = express.Router();
 
 router.use(
-    cors({
-        credentials: true,
-        origin: 'http://localhost:3001'
-    })
-)
+  cors({
+    credentials: true,
+    origin: "http://localhost:3001",
+  }),
+);
 router.use(express.json());
 
 /**
@@ -102,11 +102,11 @@ router.post("/login", login);
  *                   type: string
  *                   example: Usuário registrado
  *                 id:
- *                   type: string 
+ *                   type: string
  *                 name:
  *                   type: string
  *                 email:
- *                   type: string                          
+ *                   type: string
  *       400:
  *         description: Campos obrigatórios faltando
  *       404:
@@ -148,7 +148,7 @@ router.post("/register", register);
  *                   type: string
  *                   example: Autenticação bem sucedida
  *                 token:
- *                   type: string                    
+ *                   type: string
  *       500:
  *         description: Erro Interno do Servidor
  */
