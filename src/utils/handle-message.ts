@@ -1,9 +1,9 @@
 import { Response } from "express";
 
-type itemMessageTypes = {
+interface itemMessageTypes {
   message: string;
   path: [string];
-};
+}
 export const handleMessageResponse = (message: string, res: Response) => {
   let arrMessage = JSON.parse(message);
   arrMessage = arrMessage.map((item: itemMessageTypes) => {
