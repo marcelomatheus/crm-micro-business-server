@@ -1,21 +1,35 @@
 import swaggerJSDoc from "swagger-jsdoc";
 
 const swaggerDefinition = {
-  openapi: "3.0.0",
-  info: {
-    title: "Leads Register",
-    version: "1.0.0",
-    description: "Documentation for the Leads Register API",
-    contact: {
-      name: "Marcelo Matheus",
-      email: "marcelomatheusbr@gmai.com",
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        bearerFormat: "JWT",
+        scheme: "bearer",
+        type: "http",
+      },
     },
   },
+  info: {
+    contact: {
+      email: "marcelomatheusbr@gmai.com",
+      name: "Marcelo Matheus",
+    },
+    description: "Documentation for the Customers Register API",
+    title: "Customers CRM",
+    version: "1.0.0",
+  },
+  openapi: "3.0.0",
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
 };
 
 const options = {
+  apis: ["./src/routes/*.ts", "./src/routes/*.js"],
   definition: swaggerDefinition,
-  apis: ["./src/routes/*.ts", "./src/routes/*.js"], // Path to the API routes in your Node.js application
 };
 
 const swaggerSpec = swaggerJSDoc(options);

@@ -1,15 +1,15 @@
 import express from "express";
-import { googleAuth, login, register } from "../services/auth-service";
-import cors from "cors";
-const router = express.Router();
 
-router.use(
-    cors({
-        credentials: true,
-        origin: 'http://localhost:3001'
-    })
-)
-router.use(express.json());
+import {
+  googleAuthController,
+  loginController,
+  registerController,
+} from "../controllers/auth-controller";
+const authRouter = express.Router();
+
+import asyncHandler from "express-async-handler";
+
+authRouter.use(express.json());
 
 /**
  * @swagger
@@ -56,7 +56,7 @@ router.use(express.json());
  *       401:
  *         description: Senha inválida
  */
-router.post("/login", login);
+authRouter.post("/login", asyncHandler(loginController));
 
 /**
  * @swagger
@@ -102,11 +102,11 @@ router.post("/login", login);
  *                   type: string
  *                   example: Usuário registrado
  *                 id:
- *                   type: string 
+ *                   type: string
  *                 name:
  *                   type: string
  *                 email:
- *                   type: string                          
+ *                   type: string
  *       400:
  *         description: Campos obrigatórios faltando
  *       404:
@@ -114,7 +114,7 @@ router.post("/login", login);
  *       401:
  *         description: Senha inválida
  */
-router.post("/register", register);
+authRouter.post("/register", asyncHandler(registerController));
 
 /**
  * @swagger
@@ -148,10 +148,10 @@ router.post("/register", register);
  *                   type: string
  *                   example: Autenticação bem sucedida
  *                 token:
- *                   type: string                    
+ *                   type: string
  *       500:
  *         description: Erro Interno do Servidor
  */
-router.post("/register/google-auth", googleAuth);
+authRouter.post("/register/google-auth", asyncHandler(googleAuthController));
 
-export default router;
+export default authRouter;
