@@ -1,16 +1,26 @@
-import {
-  categoryProductSchema,
-  createCategoryProductSchema,
-  updateCategoryProductSchema,
-} from "@/zod/products-category-schema";
-import { userSchema } from "@/zod/users-schema";
 import { PrismaClient } from "@prisma/client";
 import { z } from "zod";
-const prisma = new PrismaClient();
+
+import { ApiError } from "../utils/api-error";
+import {
+  createProductCategorySchema,
+  productCategorySchema,
+  updateProductCategorySchema,
+} from "../zod-schemas/products-category-schema";
+import { userSchema } from "../zod-schemas/users-schema";
+
+type CreateProductCategoryType = UserType & z.infer<typeof createProductCategorySchema>;
+
+type ProductCategoryType = UserType & z.infer<typeof productCategorySchema>;
+
+type UpdateProductCategoryType = UserType & z.infer<typeof updateProductCategorySchema>;
 
 type UserType = z.infer<typeof userSchema>;
-export const findCategoryProducts = async ({ userId }: UserType) => {
-  const categoryProducts = await prisma.categoryProducts.findMany({
+
+const prisma = new PrismaClient();
+
+export const findProductsCategory = async ({ userId }: UserType) => {
+  const productCategory = await prisma.productCategory.findMany({
     orderBy: {
       createdAt: "asc",
     },
@@ -18,27 +28,22 @@ export const findCategoryProducts = async ({ userId }: UserType) => {
       userId: userId,
     },
   });
-  return categoryProducts;
+  return productCategory;
 };
 
-type CategoryProductType = UserType & z.infer<typeof categoryProductSchema>;
-export const findCategoryProductById = async ({ categoryId, userId }: CategoryProductType) => {
-  const validationSchema = categoryProductSchema.safeParse({ categoryId });
-  if (!validationSchema.success) throw new Error(validationSchema.error.message);
-  const categoryProduct = await prisma.categoryProducts.findUnique({
+export const findProductCategoryById = async ({ categoryId, userId }: ProductCategoryType) => {
+  const productCategory = await prisma.productCategory.findUnique({
     where: {
       id: categoryId,
       userId: userId,
     },
   });
-  return categoryProduct;
+  if (!productCategory) throw new ApiError("Categoria de produto não encontrada", 404);
+  return productCategory;
 };
 
-type CreateCategoryProductType = UserType & z.infer<typeof createCategoryProductSchema>;
-export const createCategoryProduct = async ({ payload, userId }: CreateCategoryProductType) => {
-  const validationSchema = createCategoryProductSchema.safeParse({ payload });
-  if (!validationSchema.success) throw new Error(validationSchema.error.message);
-  const categoryProduct = await prisma.categoryProducts.create({
+export const createProductCategory = async ({ payload, userId }: CreateProductCategoryType) => {
+  const productCategory = await prisma.productCategory.create({
     data: {
       name: payload.name,
       user: {
@@ -48,38 +53,36 @@ export const createCategoryProduct = async ({ payload, userId }: CreateCategoryP
       },
     },
   });
-  return categoryProduct;
+  return productCategory;
 };
 
-type UpdateCategoryProductType = UserType & z.infer<typeof updateCategoryProductSchema>;
-export const updateCategoryProduct = async ({
+export const updateProductCategory = async ({
   categoryId,
   payload,
   userId,
-}: UpdateCategoryProductType) => {
-  const validationSchema = updateCategoryProductSchema.safeParse({ categoryId, payload });
-  if (!validationSchema.success) throw new Error(validationSchema.error.message);
-  const dataCategoryProduct = await findCategoryProductById({ categoryId, userId });
-  if (!dataCategoryProduct) throw new Error("Category product not found");
-  const dataUpdated = { ...dataCategoryProduct, ...payload };
-  const categoryProduct = await prisma.categoryProducts.update({
+}: UpdateProductCategoryType) => {
+  const dataProductCategory = await findProductCategoryById({ categoryId, userId });
+
+  const dataUpdated = { ...dataProductCategory, ...payload };
+
+  const productCategory = await prisma.productCategory.update({
     data: dataUpdated,
     where: {
-      id: dataCategoryProduct.id,
+      id: dataProductCategory.id,
       userId: userId,
     },
   });
-  return categoryProduct;
+
+  return productCategory;
 };
 
-export const deleteCategoryProduct = async ({ categoryId, userId }: CategoryProductType) => {
-  const validationSchema = categoryProductSchema.safeParse({ categoryId });
-  if (!validationSchema.success) throw new Error(validationSchema.error.message);
-  const categoryProduct = await prisma.categoryProducts.delete({
+export const deleteProductCategory = async ({ categoryId, userId }: ProductCategoryType) => {
+  await findProductCategoryById({ categoryId, userId });
+  const productCategory = await prisma.productCategory.delete({
     where: {
       id: categoryId,
       userId: userId,
     },
   });
-  return categoryProduct;
+  return productCategory;
 };

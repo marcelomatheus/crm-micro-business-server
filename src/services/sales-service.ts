@@ -1,7 +1,10 @@
-import { createSalesSchema, salesSchema, updateSalesSchema } from "@/zod/sales-schema";
-import { userSchema } from "@/zod/users-schema";
 import { PrismaClient } from "@prisma/client";
 import { z } from "zod";
+
+import { ApiError } from "../utils/api-error";
+import { createSalesSchema, salesSchema, updateSalesSchema } from "../zod-schemas/sales-schema";
+import { userSchema } from "../zod-schemas/users-schema";
+
 const prisma = new PrismaClient();
 
 type UserType = z.infer<typeof userSchema>;
@@ -22,6 +25,7 @@ export const findSales = async ({ userId }: UserType) => {
       userId: userId,
     },
   });
+
   const salesWithProducts = await prisma.salesProduct.findMany({
     include: {
       product: {
@@ -61,7 +65,7 @@ export const findSales = async ({ userId }: UserType) => {
 type SalesType = UserType & z.infer<typeof salesSchema>;
 export const findSaleById = async ({ customerId, userId }: SalesType) => {
   const validationSchema = salesSchema.safeParse({ customerId, userId });
-  if (!validationSchema.success) throw new Error(validationSchema.error.message);
+  if (!validationSchema.success) throw new ApiError(validationSchema.error.message);
   const sale = await prisma.sales.findUnique({
     include: {
       customer: {
@@ -76,13 +80,15 @@ export const findSaleById = async ({ customerId, userId }: SalesType) => {
       userId: userId,
     },
   });
+  if (!sale) throw new ApiError("Venda não encontrada", 404);
   return sale;
 };
 
 type CreateSalesType = UserType & z.infer<typeof createSalesSchema>;
 export const createSales = async ({ payload, userId }: CreateSalesType) => {
   const dataValidation = createSalesSchema.safeParse({ payload, userId });
-  if (!dataValidation.success) throw new Error(dataValidation.error.message);
+  if (!dataValidation.success) throw new ApiError(dataValidation.error.message);
+
   const sale = await prisma.sales.create({
     data: {
       customer: {
@@ -112,15 +118,13 @@ export const createSales = async ({ payload, userId }: CreateSalesType) => {
       };
     }),
   });
+
   return saleProducts;
 };
 
 type UpdateSalesType = UserType & z.infer<typeof updateSalesSchema>;
 export const updateSales = async ({ customerId, payload, userId }: UpdateSalesType) => {
-  const validationSchema = updateSalesSchema.safeParse({ customerId, payload });
-  if (!validationSchema.success) throw new Error(validationSchema.error.message);
   const dataSale = await findSaleById({ customerId, userId });
-  if (!dataSale) throw new Error("Sale not found");
   const dataUpdated = { ...dataSale, ...payload };
 
   const sale = await prisma.sales.update({
@@ -142,21 +146,26 @@ export const updateSales = async ({ customerId, payload, userId }: UpdateSalesTy
       id: dataSale.id,
     },
   });
+  if (!dataUpdated.products) {
+    new ApiError("Não há produtos nesta venda", 400);
+    return;
+  }
   const saleProducts = await prisma.salesProduct.updateMany({
     data: dataUpdated.products.map((product) => {
       return {
-        productId: product.id,
-        quantity: product.quantity,
+        productId: product?.id,
+        quantity: product?.quantity,
         salesId: sale.id,
       };
     }),
   });
+
   return saleProducts;
 };
 
 export const deleteSales = async ({ customerId, userId }: SalesType) => {
   const validationSchema = salesSchema.safeParse({ customerId, userId });
-  if (!validationSchema.success) throw new Error(validationSchema.error.message);
+  if (!validationSchema.success) throw new ApiError(validationSchema.error.message);
   const sale = await prisma.sales.delete({
     where: {
       id: customerId,

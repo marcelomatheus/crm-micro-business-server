@@ -1,15 +1,17 @@
-import { createCustomerSchema, customerSchema, updateCustomerSchema } from "@/zod/customers-schema";
-import { userSchema } from "@/zod/users-schema";
 import { PrismaClient } from "@prisma/client";
 import { z } from "zod";
+
+import { ApiError } from "../utils/api-error";
+import {
+  createCustomerSchema,
+  customerSchema,
+  updateCustomerSchema,
+} from "../zod-schemas/customers-schema";
+import { userSchema } from "../zod-schemas/users-schema";
 const prisma = new PrismaClient();
 
 type UserType = z.infer<typeof userSchema>;
 export const findCustomers = async ({ userId }: UserType) => {
-  const validationSchema = userSchema.safeParse({ userId });
-  if (!validationSchema.success) {
-    throw new Error(validationSchema.error.message);
-  }
   const customers = await prisma.customers.findMany({
     orderBy: {
       createdAt: "asc",
@@ -23,25 +25,20 @@ export const findCustomers = async ({ userId }: UserType) => {
 
 type CustomerType = z.infer<typeof customerSchema>;
 export const findCustomerById = async ({ customerId, userId }: CustomerType) => {
-  const validationSchema = customerSchema.safeParse({ customerId, userId });
-  if (!validationSchema.success) throw new Error(validationSchema.error.message);
   const customer = await prisma.customers.findUnique({
     where: {
       id: customerId,
       userId: userId,
     },
   });
-  if (!customer) throw new Error("Customer not found");
+  if (!customer) throw new ApiError("Customer not found", 404);
   return customer;
 };
 
 type CreateCustomerType = z.infer<typeof createCustomerSchema>;
 export const createCustomer = async ({ payload, userId }: CreateCustomerType) => {
-  const validationSchema = createCustomerSchema.safeParse({ payload, userId });
-  if (!validationSchema.success) throw new Error(validationSchema.error.message);
   const customer = await prisma.customers.create({
     data: {
-      address: payload.address,
       email: payload.email,
       name: payload.name,
       phone: payload.phone,
@@ -58,12 +55,27 @@ export const createCustomer = async ({ payload, userId }: CreateCustomerType) =>
 
 type UpdateCustomerType = z.infer<typeof updateCustomerSchema>;
 export const updateCustomer = async ({ customerId, payload, userId }: UpdateCustomerType) => {
-  const validationSchema = updateCustomerSchema.safeParse({ customerId, userId });
-  if (!validationSchema.success) throw new Error(validationSchema.error.message);
   const dataCustomer = await findCustomerById({ customerId, userId });
   const dataUpdated = { ...dataCustomer, ...payload };
   const customer = await prisma.customers.update({
-    data: dataUpdated,
+    data: {
+      address:
+        dataUpdated.address?.city && dataUpdated.address.country && dataUpdated.address.state
+          ? {
+              set: {
+                city: dataUpdated.address.city,
+                country: dataUpdated.address.country,
+                state: dataUpdated.address.state,
+                street: dataUpdated.address.street ?? null,
+                zip: dataUpdated.address.zip ?? null,
+              },
+            }
+          : undefined,
+      email: dataUpdated.email,
+      name: dataUpdated.name,
+      phone: dataUpdated.phone,
+      status: dataUpdated.status,
+    },
     where: {
       id: dataCustomer.id,
       userId: userId,
@@ -73,10 +85,7 @@ export const updateCustomer = async ({ customerId, payload, userId }: UpdateCust
 };
 
 export const deleteCustomer = async ({ customerId, userId }: CustomerType) => {
-  const validationSchema = customerSchema.safeParse({ customerId, userId });
-  if (!validationSchema.success) throw new Error(validationSchema.error.message);
-  const dataCustomer = await findCustomerById({ customerId, userId });
-  if (!dataCustomer.id) throw new Error("Customer not found");
+  await findCustomerById({ customerId, userId });
   const customer = await prisma.customers.delete({
     where: {
       id: customerId,
