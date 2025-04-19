@@ -23,7 +23,7 @@ model User {
   googleUser       GoogleUser?
   Customers        Customers?
   Sales            Sales?
-  CategoryProducts CategoryProducts?
+  ProductCategory ProductCategory?
   Products         Products?
 
   createdAt DateTime @default(now())
@@ -84,7 +84,7 @@ model Sales {
   createdAt DateTime @default(now())
 }
 
-model CategoryProducts {
+model ProductCategory {
   id   String @id @default(auto()) @map("_id") @db.ObjectId
   name String
 
@@ -105,7 +105,7 @@ model Products {
   image    String?
 
   categoryId String           @unique @db.ObjectId
-  category   CategoryProducts @relation(fields: [categoryId], references: [id])
+  category   ProductCategory @relation(fields: [categoryId], references: [id])
 
   userId String @unique @db.ObjectId
   user   User   @relation(fields: [userId], references: [id])
