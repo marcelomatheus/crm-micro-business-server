@@ -1,6 +1,15 @@
 import swaggerJSDoc from "swagger-jsdoc";
 
 const swaggerDefinition = {
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        bearerFormat: "JWT",
+        scheme: "bearer",
+        type: "http",
+      },
+    },
+  },
   info: {
     contact: {
       email: "marcelomatheusbr@gmai.com",
@@ -11,10 +20,15 @@ const swaggerDefinition = {
     version: "1.0.0",
   },
   openapi: "3.0.0",
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
 };
 
 const options = {
-  apis: ["./src/routes/*.ts", "./src/routes/*.js"], // Path to the API routes in your Node.js application
+  apis: ["./src/routes/*.ts", "./src/routes/*.js"],
   definition: swaggerDefinition,
 };
 
