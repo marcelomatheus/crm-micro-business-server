@@ -41,6 +41,7 @@ export const createCustomer = async ({ payload, userId }: CreateCustomerType) =>
     data: {
       email: payload.email,
       name: payload.name,
+      notes: payload.notes,
       phone: payload.phone,
       status: payload.status,
       user: {
@@ -71,8 +72,10 @@ export const updateCustomer = async ({ customerId, payload, userId }: UpdateCust
               },
             }
           : undefined,
+
       email: dataUpdated.email,
       name: dataUpdated.name,
+      notes: dataUpdated.notes ?? null,
       phone: dataUpdated.phone,
       status: dataUpdated.status,
     },

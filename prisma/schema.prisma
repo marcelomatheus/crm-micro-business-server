@@ -57,6 +57,8 @@ model Customers {
   email String?
   phone String
 
+  notes String?
+
   address CustomerAddressType?
   status  CustomerStatusEnum
 

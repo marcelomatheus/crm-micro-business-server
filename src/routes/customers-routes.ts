@@ -109,6 +109,10 @@ customersRouter.get("/:id", requestAuthorization, asyncHandler(findCustomerByIdC
  *                 type: string
  *                 description: Telefone do cliente
  *                 example: "3899987856"
+ *               notes:
+ *                 type: string
+ *                 description: Observações sobre o cliente
+ *                 example: "Cliente fiel"
  *     responses:
  *       201:
  *         description: Cliente criado com sucesso
