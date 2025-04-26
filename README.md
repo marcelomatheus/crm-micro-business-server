@@ -46,7 +46,7 @@ npm install
 
 3. Pull the database schema (Prisma):
 ```bash
-npx prisma db pull
+npx prisma db push
 ```
 
 4. Configure environment variables:
