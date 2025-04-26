@@ -20,7 +20,7 @@ The application uses a clear architecture with separated responsibilities:
 - `Swagger (API Documentation)`
 - `Zod (Validation)`
 
-## Folder Structure
+## Src Folder Structure
 ```
 src/
 │
@@ -28,7 +28,8 @@ src/
 ├─ controllers/  # Request validation and handling
 ├─ services/     # Business logic functions
 ├─ middlewares/  # Authentication and authorization
-└─ config/       # Configuration files (Swagger, Prisma, etc.)
+├─ zod-schemas/  # Schemas for validation
+└─ utils/        # Configuration files (Swagger, Prisma, etc.)
 ```
 
 ## Installation
