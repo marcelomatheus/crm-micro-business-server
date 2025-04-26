@@ -34,8 +34,8 @@ src/
 ## Installation
 1. Clone the repository:
 ```bash
-git clone https://github.com/marcelomatheus/leads-register-server.git
-cd leads-register-server
+git clone https://github.com/marcelomatheus/crm-micro-business-server.git
+cd crm-micro-business-server
 ```
 
 2. Install dependencies:
@@ -53,6 +53,9 @@ Create a `.env` file in the root directory and set the following variables:
 ```env
 DATABASE_URL=<your_database_connection_string>
 JWT_SECRET=<your_jwt_secret>
+GOOGLE_CLIENT_ID=<your_google_client_id>
+GOOGLE_CLIENT_SECRET=<your_google_client_secret>
+REDIRECT_URI=<your_google_redirect_uri>
 ```
 
 ## Running the Application
