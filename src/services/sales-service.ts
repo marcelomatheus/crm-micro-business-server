@@ -54,7 +54,7 @@ export const findSales = async ({ userId }: UserType) => {
     },
     where: {
       salesId: {
-        in: sales.map((sale) => sale.id),
+        in: sales.map((sale: { id: string }) => sale.id),
       },
     },
   });
@@ -122,6 +122,11 @@ export const createSales = async ({ payload, userId }: CreateSalesType) => {
   return saleProducts;
 };
 
+interface productType {
+  id?: string | undefined;
+  quantity?: number | undefined;
+}
+
 type UpdateSalesType = UserType & z.infer<typeof updateSalesSchema>;
 export const updateSales = async ({ customerId, payload, userId }: UpdateSalesType) => {
   const dataSale = await findSaleById({ customerId, userId });
@@ -151,7 +156,7 @@ export const updateSales = async ({ customerId, payload, userId }: UpdateSalesTy
     return;
   }
   const saleProducts = await prisma.salesProduct.updateMany({
-    data: dataUpdated.products.map((product) => {
+    data: dataUpdated.products.map((product: productType | undefined) => {
       return {
         productId: product?.id,
         quantity: product?.quantity,
